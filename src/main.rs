@@ -1,22 +1,49 @@
-extern crate rand;
+extern crate glium;
 
-use rand::*;
-
-use crate::cjsmat::*;
-use crate::neural::*;
-
-mod cjsmat;
-mod neural;
+use glium::*;
+use glium::glutin::*;
+use glium::glutin::dpi::*;
 
 fn main() {
-    let mut neural_network_test: VecDenseNeuralNetwork<VecMutMatrix>
-        = VecDenseNeuralNetwork::new(3, 2, 3, 2);
+    println!("Hello world!");
 
-    neural_network_test.randomize_values(0.0, 1.0);
-    println!("Neural network: {:#?}", neural_network_test);
+    let mut events_loop = EventsLoop::new();
 
-    let mut rng = rand::thread_rng();
-    let test_input = [rng.gen(), rng.gen(), rng.gen()];
-    let test_output = neural_network_test.feed_forward(&test_input);
-    println!("{:?}", test_output);
+    let display = create_display(640, 400, "Hello world!", &events_loop);
+
+    loop {
+        let mut close_requested = false;
+        events_loop.poll_events(|e| {
+            match e {
+                Event::WindowEvent { event, .. } => {
+                    match event {
+                        WindowEvent::CloseRequested => (close_requested = true),
+                        _ => {},
+                    }
+                },
+                _ => {},
+            }
+        });
+        if close_requested {
+            break;
+        }
+
+        update();
+
+        let mut frame = display.draw();
+        frame.clear_all((0.0, 0.0, 0.0, 1.0), 0.0, 0);
+        draw(&display, &mut frame);
+        frame.finish().unwrap();
+    }
+}
+
+fn update() {}
+
+fn draw(display: &Display, frame: &mut Frame) {}
+
+fn create_display(width: i32, height: i32, title: &str, events_loop: &EventsLoop) -> Display {
+    let window_builder = WindowBuilder::new()
+        .with_dimensions(LogicalSize::new(width as f64, height as f64))
+        .with_title(title);
+    Display::new(window_builder, ContextBuilder::new(), events_loop).unwrap()
 }
